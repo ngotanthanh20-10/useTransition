@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useTransition, startTransaction } from "react";
 
-import { generateProducts } from './data';
-import ProductList from './components/ProductList';
+import { generateProducts } from "./data";
+import ProductList from "./components/ProductList";
 
 const dummyProducts = generateProducts();
 
@@ -13,17 +13,26 @@ function filterProducts(filterTerm) {
 }
 
 function App() {
-  const [filterTerm, setFilterTerm] = useState('');
-
+  const [isPending, startTransaction] = useTransition();
+  const [filterTerm, setFilterTerm] = useState("");
   const filteredProducts = filterProducts(filterTerm);
 
   function updateFilterHandler(event) {
-    setFilterTerm(event.target.value);
+    startTransaction(() => {
+      setFilterTerm(event.target.value);
+    });
   }
 
   return (
     <div id="app">
-      <input type="text" onChange={updateFilterHandler} />
+      <input
+        type="text"
+        onChange={updateFilterHandler}
+        style={{ width: "100%" }}
+      />
+      {isPending && (
+        <p style={{ color: "white", margin: "20px" }}>Uploading List.....</p>
+      )}
       <ProductList products={filteredProducts} />
     </div>
   );
